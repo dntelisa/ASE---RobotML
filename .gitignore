@@ -1,0 +1,10 @@
+ecore/org.xtext.example.mydsl/.launch/
+ecore/org.xtext.example.mydsl/.settings/
+ecore/org.xtext.example.mydsl.ide/
+ecore/org.xtext.example.mydsl.ui/
+ecore/org.xtext.example.mydsl.tests/
+ecore/org.xtext.example.mydsl.ui.tests/
+ecore/org.xtext.example.mydsl/bin/
+ecore/RobotML/.settings/
+
+
