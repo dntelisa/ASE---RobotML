@@ -29,6 +29,10 @@ Le métamodèle (défini initialement à la main puis avec Ecore) structure les 
 
 - **Capteurs et commandes** : Accès aux données environnementales (*Distance*, *Time*, *Battery*), et primitives de mouvement (*Forward*, *Backward*, *SideLeft*, *SideRight*). Chaque accès aux capteurs et chaque primitive de mouvement est représentée par sa propre classe. Les capteurs sont des *Expression*s; en effet, cela n'est pas très différent d'un appel de fonction. Les commandes sont des *Statement*s.
 
+---
+
+## 2. Décisions d'Ingénierie & Alternatives
+
 ### Gestion des unités
 
 Nous traitons les unités (cm, mm, rad, deg) comme une simples propriété de la classe *Number* (attribut de type *Unit*), plutôt que comme des classes à part entière. Cela nous permet de simplifier grandement la structure de notre métamodèle. La contrepartie est que nous devons nous assurer de la compatibilité entre unités au niveau sémantique, alors que cela serait possible au niveau syntaxique avec des unités représentées en tant que classes.
@@ -44,8 +48,3 @@ Nous avons décidé de distinguer les opérations booléennes des opérations ar
 <!-- * Distinction explicite dans le métamodèle et la grammaire. -->
 <!---->
 <!-- * Cela simplifie l'écriture des règles de validation et évite les incohérences de type lors de la génération de code. -->
-
-
----
-
-## 2. Décisions d'Ingénierie & Alternatives
