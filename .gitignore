@@ -6,5 +6,8 @@ ecore/org.xtext.example.mydsl.tests/
 ecore/org.xtext.example.mydsl.ui.tests/
 ecore/org.xtext.example.mydsl/bin/
 ecore/RobotML/.settings/
-
-
+ecore/org.xtext.example.mydsl/.project
+ecore/RobotML/.project
+ecore/org.xtext.example.mydsl/build.properties
+ecore/org.xtext.example.mydsl/src-gen/
+ecore/org.xtext.example.mydsl/xtend-gen/
