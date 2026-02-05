@@ -11,3 +11,4 @@ ecore/RobotML/.project
 ecore/org.xtext.example.mydsl/build.properties
 ecore/org.xtext.example.mydsl/src-gen/
 ecore/org.xtext.example.mydsl/xtend-gen/
+node_modules/
