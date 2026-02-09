@@ -2,6 +2,9 @@ import { type Module, inject } from 'langium';
 import { createDefaultModule, createDefaultSharedModule, type DefaultSharedModuleContext, type LangiumServices, type LangiumSharedServices, type PartialLangiumServices } from 'langium/lsp';
 import { RobotMlGeneratedModule, RobotMlGeneratedSharedModule } from './generated/module.js';
 import { RobotMlValidator, registerValidationChecks } from './robot-ml-validator.js';
+import { RobotMlAcceptWeaver } from '../semantics/robot-ml-accept-weaver.js';
+import { RobotMlCustomValidationVisitor } from '../semantics/robot-ml-custom-validation-visitor.js';
+import { registerVisitorAsValidator } from '../semantics/robot-ml-visitor.js';
 
 /**
  * Declaration of custom services - add your own service classes here.
@@ -9,6 +12,10 @@ import { RobotMlValidator, registerValidationChecks } from './robot-ml-validator
 export type RobotMlAddedServices = {
     validation: {
         RobotMlValidator: RobotMlValidator
+    }
+    visitors: {
+        RobotMlAcceptWeaver: RobotMlAcceptWeaver
+        RobotMlCustomValidationVisitor: RobotMlCustomValidationVisitor
     }
 }
 
@@ -26,6 +33,10 @@ export type RobotMlServices = LangiumServices & RobotMlAddedServices
 export const RobotMlModule: Module<RobotMlServices, PartialLangiumServices & RobotMlAddedServices> = {
     validation: {
         RobotMlValidator: () => new RobotMlValidator()
+    },
+    visitors: {
+        RobotMlAcceptWeaver: (services) => new RobotMlAcceptWeaver(services),
+        RobotMlCustomValidationVisitor: () => new RobotMlCustomValidationVisitor()
     }
 };
 
@@ -59,9 +70,14 @@ export function createRobotMlServices(context: DefaultSharedModuleContext): {
     );
     shared.ServiceRegistry.register(RobotMl);
     registerValidationChecks(RobotMl);
+
+    // Forcer l'initialisation du Weaver pour que le visiteur marche
+    RobotMl.visitors.RobotMlAcceptWeaver;
+
+    registerVisitorAsValidator(RobotMl.visitors.RobotMlCustomValidationVisitor, RobotMl);
+
     if (!context.connection) {
-        // We don't run inside a language server
-        // Therefore, initialize the configuration provider instantly
+        // Si on n'est pas dans un contexte LSP, on doit initialiser la configuration manuellement
         shared.workspace.ConfigurationProvider.initialized({});
     }
     return { shared, RobotMl };
