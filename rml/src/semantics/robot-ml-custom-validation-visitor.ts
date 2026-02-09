@@ -24,6 +24,50 @@ export class RobotMlCustomValidationVisitor extends RobotMlValidationVisitor {
         }
     }
 
+    visitProgramme(node: Programme) {
+        // Regarde si la fonction 'entry' est présente
+        const entryFunc = node.funcdecl.find(f => f.name === 'entry');
+        if (!entryFunc) {
+            this.validationAccept('error', "Le programme doit contenir une fonction nommée 'entry'.", { node: node });
+        }
+        
+        // Verification des doublons de fonctions
+        const names = new Set<string>();
+        for (const func of node.funcdecl) {
+            if (func.name) {
+                if (names.has(func.name)) {
+                     this.validationAccept('error', 
+                        `La fonction '${func.name}' est définie plusieurs fois.`, 
+                        { node: func, property: 'name' }
+                    );
+                }
+                names.add(func.name);
+            }
+        }
+        this.visitChildren(node);
+    }
+
+    visitFuncDecl(node: FuncDecl) {
+        const declaredVars = new Set<string>();
+        
+        // Vérification doublons variables dans la fonction
+        for (const stmt of node.statementlist.state) {
+            if (stmt.$type === 'VarDecl') {
+                const varName = (stmt as any).name;
+                if (declaredVars.has(varName)) {
+                    this.validationAccept('error', 
+                        `La variable '${varName}' est déjà déclarée dans cette fonction.`, 
+                        { node: stmt, property: 'name' }
+                    );
+                } else {
+                    declaredVars.add(varName);
+                }
+            }
+        }
+        
+        this.visitChildren(node);
+    } 
+
     // Validation des déclarations de variables
 
     visitVarDecl(node: VarDecl): any {
@@ -71,6 +115,12 @@ export class RobotMlCustomValidationVisitor extends RobotMlValidationVisitor {
                 );
             }
         }
+        if (node.distance && node.distance.$type === 'NumLiteral') {
+             const val = (node.distance as any).val;
+             if (val < 0) {
+                 this.validationAccept('error', "La distance ne peut pas être négative.", { node, property: 'distance' });
+             }
+        }
         this.visitChildren(node);
     }
 
@@ -98,6 +148,13 @@ export class RobotMlCustomValidationVisitor extends RobotMlValidationVisitor {
                 );
             }
         }
+        // Vérification de la valeur 
+            if (node.speed.$type === 'NumLiteral') {
+                const val = (node.speed as any).val;
+                if (val < 0) {
+                    this.validationAccept('error', "La vitesse ne peut pas être négative.", { node, property: 'speed' });
+                }
+            }
         this.visitChildren(node);
     }
 
@@ -178,8 +235,6 @@ export class RobotMlCustomValidationVisitor extends RobotMlValidationVisitor {
 
     // Visiteurs génériques pour parcourir l'arbre
 
-    visitProgramme(node: Programme) { this.visitChildren(node); }
-    visitFuncDecl(node: FuncDecl) { this.visitChildren(node); }
     visitStatementList(node: StatementList) { this.visitChildren(node); }
     visitStatement(node: any) { this.visitChildren(node); }
     visitExpression(node: Expression) { this.visitChildren(node); }
