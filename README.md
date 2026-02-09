@@ -2,7 +2,7 @@
 
 Ce projet implémente le Domain-Specific Languages (DSL) RobotML. Un langage destiné à donner des instructions à un robot. Il couvre toutes les étapes de sa mise en oeuvre: la définition de métamodèle en utilisant ecore, la modelisation textuel avec Langium, la mise en place de l'interpréteur et du compilateur. 
 
-## Structure du Projet
+## Structure du projet
 
 L'architecture du projet est organisée pour séparer la syntaxe, la sémantique et les outils web.
 
@@ -17,7 +17,7 @@ L'architecture du projet est organisée pour séparer la syntaxe, la sémantique
 
 Le métamodèle (défini initialement à la main puis avec Ecore) structure les concepts clés du langage.
 
-### Concepts Clés
+### Concepts clés
 
 - **Programme et Fonctions** : La class *Programme* constitue la racine du métamodèle. Le programme contient ou non des déclarations de fonctions (*FuncDecl*). La signature d'une fonction est constituée d'un *Type* et de plusieurs déclarations de variables (*VarDecl*).
 
@@ -31,7 +31,7 @@ Le métamodèle (défini initialement à la main puis avec Ecore) structure les 
 
 ---
 
-### 1.2. Décisions d'Ingénierie & Alternatives
+### 1.2. Décisions d'ingénierie
 
 ### Gestion des unités
 
@@ -53,7 +53,7 @@ Nous avons décidé de distinguer les opérations booléennes des opérations ar
 
 La chaîne de compilation transforme un fichier RobotML (`.rml`) en code pour être utilisé sur un robot Arduino.
 
-### 2.1. Architecture du Compilateur
+### 2.1. Architecture du compilateur
 
 Pour exécuter le programme, le visitor design pattern est utilisé. 
 La classe `RobotMlCompiler` implémente l'interface `RobotMlVisitor` générée par Langium. Elle parcourt l'arbre de syntaxe abstraite (AST) produit par le parseur et génère le texte correspondant au code Arduino final.
@@ -62,7 +62,7 @@ La classe `RobotMlCompiler` implémente l'interface `RobotMlVisitor` générée 
 
 La traduction s'effectue de la manière suivante:
 
-* **Structure Globale** :
+* **Structure globale** :
 * Les bibliothèques Arduino nécessaires (`Omni4WD`, `MotorWheel`, `PID_Beta6`...) et les instances globales (moteurs `wheel1`...`wheel4`, interruptions `irqISR`) sont incluses automatiquement dans chaque en-tête de fichiers produits.
 * La fonction `entry()` qui permet d'exécuter le code du RobotML est injectée dans la boucle infinie `void loop()` de l'Arduino.
 * La fonction `setup()` est générée pour initialiser les timers et les interruptions est également ajouté à l'en-tête de chaque fichier.
@@ -76,7 +76,7 @@ La traduction s'effectue de la manière suivante:
 |`Void`     | `void`  |
 
 
-* **Gestion des Capteurs** :
+* **Gestion des capteurs** :
 * L'appel à `getDistance()` est traduits par un appel à une fonctions générée `senseDistance()` qui encapsulent la logique bas niveau (gestion des pins `OUTPUT`/`INPUT`, `pulseIn`, conversions).
 * `getTimestamp()` est traduit par la fonction Arduino `millis()`.
 
@@ -105,7 +105,7 @@ Un système de **validation personnalisée** (`RobotMlCustomValidationVisitor`) 
 
 ### 2.5. Décisions d'ingénierie
 
-#### Utilisation du pattern visitor pour la vompilation
+#### Utilisation du pattern visitor pour la compilation
 
 Le pattern visitor permet de séparer la logique de traversée de l'AST de la définition des nœuds, plutôt que d'ajouter des méthodes de génération directement dans les classes du modèle.
 Le modèle (AST) ne dépend pas de la cible de compilation. Si nous devions générer du code Python ou Java pour un simulateur, il suffirait de créer un nouveau visiteur sans toucher au modèle existant.
@@ -116,7 +116,7 @@ Le CLI (`cli-util.ts`) bloque le processus si une erreur de syntaxe (parser) ou 
 
 ---
 
-## 3. Installation et Utilisation
+## 3. Installation et utilisation
 
 ### Prérequis
 
@@ -171,7 +171,7 @@ node out/cli/index.js generate test.rml
 
 ```
 
-## 4. Localisation des Fichiers Sources
+## 4. Localisation des fichiers sources
 
 Voici où trouver les fichiers essentiels implémentant la logique décrite précédemment :
 
