@@ -4,9 +4,7 @@ import { URI } from 'langium';
 import { LangiumCoreServices, LangiumDocument } from 'langium';
 import { Diagnostic } from 'vscode-languageserver';
 
-/**
- * Charge un document Langium depuis un fichier et vérifie les erreurs.
- */
+/// Extrait un document Langium à partir d'un fichier et fait la validation complète (parser + linker + validateurs personnalisés).
 export async function extractDocument(fileName: string, services: LangiumCoreServices): Promise<LangiumDocument> {
     const extensions = services.LanguageMetaData.fileExtensions;
     if (!extensions.includes(path.extname(fileName))) {
@@ -23,15 +21,26 @@ export async function extractDocument(fileName: string, services: LangiumCoreSer
     
     const document = await services.shared.workspace.LangiumDocuments.getOrCreateDocument(uri);
     
-    // Construction du document (validation, link, etc.)
-    await services.shared.workspace.DocumentBuilder.build([document]);
+    // Force la construction et la validation complète -> validation: true va déclencher à la fois le linker et les validateurs personnalisés
+    await services.shared.workspace.DocumentBuilder.build([document], { validation: true });
 
+    // Vérification des erreurs de syntaxe (parser)
+    const parserErrors = document.parseResult.parserErrors;
+    if (parserErrors.length > 0) {
+        console.error('Erreurs de Syntaxe détectées :');
+        for (const err of parserErrors) {
+            console.error(`   Ligne ${err.token.startLine}: ${err.message}`);
+        }
+        process.exit(1);
+    }
+
+    // Vérification des erreurs de validation (linker + custom visitor)
     const validationErrors = (document.diagnostics ?? []).filter((e: Diagnostic) => e.severity === 1);
     
     if (validationErrors.length > 0) {
-        console.error('There are validation errors:');
+        console.error('Erreurs de validation détectées :');
         for (const validationError of validationErrors) {
-            console.error(`line ${validationError.range.start.line + 1}: ${validationError.message} [${document.textDocument.getText(validationError.range)}]`);
+            console.error(`   Ligne ${validationError.range.start.line + 1}: ${validationError.message} [${document.textDocument.getText(validationError.range)}]`);
         }
         process.exit(1);
     }

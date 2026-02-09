@@ -89,21 +89,21 @@ Expression returns Expression:
 BooleanExpression returns Expression:
     ArithmeticExpression (
         {BoolBinaryOperation.operands+=current} 
-        ^type=BoolBOp 
+        operator=BoolBOp   
         operands+=ArithmeticExpression
     )*;
 
 ArithmeticExpression returns Expression:
     Multiplication (
         {NumBinaryOperation.operands+=current} 
-        ^type=('+' | '-') 
+        operator=('+' | '-')  
         operands+=Multiplication
     )*;
 
 Multiplication returns Expression:
     PrimaryExpression (
         {NumBinaryOperation.operands+=current} 
-        ^type=('*' | '/') 
+        operator=('*' | '/')  
         operands+=PrimaryExpression
     )*;
 
@@ -130,11 +130,11 @@ NumLiteral returns NumLiteral:
 ;
 
 BoolUnaryOperation returns BoolUnaryOperation:
-    ^type=BoolUOp operand=Expression  
+    operator=BoolUOp operand=Expression  
 ;
 
 NumUnaryOperation returns NumUnaryOperation:
-    ^type=NumUOp operand=Expression  
+    operator=NumUOp operand=Expression   
 ;
 
 EString returns string:

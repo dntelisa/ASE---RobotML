@@ -3,6 +3,8 @@ import { createDefaultModule, createDefaultSharedModule, type DefaultSharedModul
 import { RobotMlGeneratedModule, RobotMlGeneratedSharedModule } from './generated/module.js';
 import { RobotMlValidator, registerValidationChecks } from './robot-ml-validator.js';
 import { RobotMlAcceptWeaver } from '../semantics/robot-ml-accept-weaver.js';
+import { RobotMlCustomValidationVisitor } from '../semantics/robot-ml-custom-validation-visitor.js';
+import { registerVisitorAsValidator } from '../semantics/robot-ml-visitor.js';
 
 /**
  * Declaration of custom services - add your own service classes here.
@@ -13,6 +15,7 @@ export type RobotMlAddedServices = {
     }
     visitors: {
         RobotMlAcceptWeaver: RobotMlAcceptWeaver
+        RobotMlCustomValidationVisitor: RobotMlCustomValidationVisitor
     }
 }
 
@@ -32,7 +35,8 @@ export const RobotMlModule: Module<RobotMlServices, PartialLangiumServices & Rob
         RobotMlValidator: () => new RobotMlValidator()
     },
     visitors: {
-        RobotMlAcceptWeaver: (services) => new RobotMlAcceptWeaver(services)
+        RobotMlAcceptWeaver: (services) => new RobotMlAcceptWeaver(services),
+        RobotMlCustomValidationVisitor: () => new RobotMlCustomValidationVisitor()
     }
 };
 
@@ -69,6 +73,8 @@ export function createRobotMlServices(context: DefaultSharedModuleContext): {
 
     // Forcer l'initialisation du Weaver pour que le visiteur marche
     RobotMl.visitors.RobotMlAcceptWeaver;
+
+    registerVisitorAsValidator(RobotMl.visitors.RobotMlCustomValidationVisitor, RobotMl);
 
     if (!context.connection) {
         // Si on n'est pas dans un contexte LSP, on doit initialiser la configuration manuellement

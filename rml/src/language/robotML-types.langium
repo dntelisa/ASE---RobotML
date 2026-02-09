@@ -115,7 +115,6 @@ interface Conditional extends ControlStructure {
     elseBody?: StatementList
 }
 
-// CORRECTION ICI : Ajout de unit
 interface SetSpeed extends Command {
     speed: Expression
     unit?: Unit
@@ -137,7 +136,7 @@ interface NumLiteral extends Literal {
 }
 
 interface BoolUnaryOperation extends UnarOperation {
-    ^type?: BoolUOp
+    operator?: BoolUOp
 }
 
 interface UnarOperation extends Operation {
@@ -148,11 +147,11 @@ interface Operation extends Expression {
 }
 
 interface NumUnaryOperation extends UnarOperation {
-    ^type?: NumUOp
+    operator?: NumUOp
 }
 
 interface BoolBinaryOperation extends BinaryOperation {
-    ^type?: BoolBOp
+    operator?: BoolBOp
 }
 
 interface BinaryOperation extends Operation {
@@ -160,7 +159,7 @@ interface BinaryOperation extends Operation {
 }
 
 interface NumBinaryOperation extends BinaryOperation {
-    ^type?: NumBOp
+    operator?: NumBOp
 }
 
 interface SensorAccess extends Expression {

@@ -12,6 +12,12 @@ export type GenerateOptions = {
     destination?: string;
 }
 
+export const parseAndValidateAction = async (fileName: string): Promise<void> => {
+    const services = createRobotMlServices(NodeFileSystem).RobotMl;
+    await extractAstNode<Programme>(fileName, services);
+    console.log(`Le fichier ${fileName} est valide`);
+}; 
+
 export const generateAction = async (fileName: string, opts: GenerateOptions): Promise<void> => {
     const services = createRobotMlServices(NodeFileSystem).RobotMl;
     const model = await extractAstNode<Programme>(fileName, services);
@@ -26,7 +32,7 @@ export const generateAction = async (fileName: string, opts: GenerateOptions): P
     const generatedFilePath = fileName.replace(path.extname(fileName), '.ino');
     fs.writeFileSync(generatedFilePath, generatedCode);
 
-    console.log(`Code Arduino généré avec succès dans : ${generatedFilePath}`);
+    console.log(`Code Arduino généré dans ${generatedFilePath}`);
 };
 
 export default function(): void {
@@ -34,6 +40,13 @@ export default function(): void {
 
     program
         .version('0.0.1')
+
+    program
+        .command('parseAndValidate <file>')
+        .description('Valide le fichier RobotML')
+        .action(parseAndValidateAction);
+
+    program
         .command('generate <file>')
         .description('Generates Arduino code from RobotML')
         .action(generateAction);

@@ -26,61 +26,60 @@ export class RobotMlCompiler implements RobotMlVisitor {
             .map(f => this.visitFuncDecl(f))
             .join('\n');
 
-        // 2Génération du contenu du loop (corps de entry)
+        // Génération du contenu du loop (corps de entry)
         const entryFunc = node.funcdecl.find(f => f.name === 'entry');
         const loopContent = entryFunc ? this.visitStatementList(entryFunc.statementlist) : '';
 
-        // Assemblage final
         return `
-                #include <PinChangeInt.h>
-                #include <PinChangeIntConfig.h>
-                #include <EEPROM.h>
-                #define _NAMIKI_MOTOR
-                #include <fuzzy_table.h>
-                #include <PID_Beta6.h>
-                #include <MotorWheel.h>
-                #include <Omni4WD.h>
+#include <PinChangeInt.h>
+#include <PinChangeIntConfig.h>
+#include <EEPROM.h>
+#define _NAMIKI_MOTOR
+#include <fuzzy_table.h>
+#include <PID_Beta6.h>
+#include <MotorWheel.h>
+#include <Omni4WD.h>
 
-                irqISR(irq1, isr1);
-                MotorWheel wheel1(3, 2, 4, 5, &irq1);
-                irqISR(irq2, isr2);
-                MotorWheel wheel2(11, 12, 14, 15, &irq2);
-                irqISR(irq3, isr3);
-                MotorWheel wheel3(9, 8, 16, 17, &irq3);
-                irqISR(irq4, isr4);
-                MotorWheel wheel4(10, 7, 18, 19, &irq4);
-                Omni4WD Omni(&wheel1, &wheel2, &wheel3, &wheel4);
+irqISR(irq1, isr1);
+MotorWheel wheel1(3, 2, 4, 5, &irq1);
+irqISR(irq2, isr2);
+MotorWheel wheel2(11, 12, 14, 15, &irq2);
+irqISR(irq3, isr3);
+MotorWheel wheel3(9, 8, 16, 17, &irq3);
+irqISR(irq4, isr4);
+MotorWheel wheel4(10, 7, 18, 19, &irq4);
+Omni4WD Omni(&wheel1, &wheel2, &wheel3, &wheel4);
 
-                int speed = 30;
-                long dist_accel;
-                long delaying;
+int speed = 30;
+long dist_accel;
+long delaying;
 
-                long senseDistance() {
-                    long duration;
-                    pinMode(6, OUTPUT);
-                    digitalWrite(6, LOW);
-                    delayMicroseconds(2);
-                    digitalWrite(6, HIGH);
-                    delayMicroseconds(5);
-                    digitalWrite(6, LOW);
-                    pinMode(6, INPUT);
-                    duration = pulseIn(6, HIGH);
-                    delay(100);
-                    return duration / 29 / 2 * 10;
-                }
+long senseDistance() {
+    long duration;
+    pinMode(6, OUTPUT);
+    digitalWrite(6, LOW);
+    delayMicroseconds(2);
+    digitalWrite(6, HIGH);
+    delayMicroseconds(5);
+    digitalWrite(6, LOW);
+    pinMode(6, INPUT);
+    duration = pulseIn(6, HIGH);
+    delay(100);
+    return duration / 29 / 2 * 10;
+}
 
-                ${userFunctions}
+${userFunctions}
 
-                void setup() {
-                    TCCR1B = TCCR1B & 0xf8 | 0x01;
-                    TCCR2B = TCCR2B & 0xf8 | 0x01;
-                    Omni.PIDEnable(0.31, 0.01, 0, 10);
-                }
+void setup() {
+    TCCR1B = TCCR1B & 0xf8 | 0x01;
+    TCCR2B = TCCR2B & 0xf8 | 0x01;
+    Omni.PIDEnable(0.31, 0.01, 0, 10);
+}
 
-                void loop() {
-                    ${loopContent}
-                    while(1); // Stop après exécution
-                }`;
+void loop() {
+    ${loopContent}
+    while(1); // Stop après exécution
+}`;
     }
 
     visitFuncDecl(node: FuncDecl): string {
@@ -123,13 +122,13 @@ export class RobotMlCompiler implements RobotMlVisitor {
         if (node.side === 'Sideright') cmd = "Omni.setCarRight";
 
         return `
-                dist_accel = speed * ${this.ACCEL_FACTOR};
-                delaying = (167 * (${expr} - dist_accel)) / speed;
-                ${cmd}(speed);
-                Omni.setCarSpeedMMPS(speed, 500);
-                delay(delaying);
-                Omni.setCarSlow2Stop(500);
-                delay(500);`;
+    dist_accel = speed * ${this.ACCEL_FACTOR};
+    delaying = (167 * (${expr} - dist_accel));
+    ${cmd}(speed);
+    Omni.setCarSpeedMMPS(speed, 500);
+    delay(delaying);
+    Omni.setCarSlow2Stop(500);
+    delay(500);`;
     }
 
     visitClock(node: Clock): string {
@@ -137,13 +136,13 @@ export class RobotMlCompiler implements RobotMlVisitor {
         const expr = this.visitExpression(node.distance);
         
         return `
-                dist_accel = speed * ${this.ACCEL_FACTOR};
-                delaying = (167 * ((${expr} * ${this.ROTATION_FACTOR}) - dist_accel)) / speed;
-                Omni.setCarRotateRight(speed);
-                Omni.setCarSpeedMMPS(speed, 500);
-                delay(delaying);
-                Omni.setCarSlow2Stop(500);
-                delay(500);`;
+    dist_accel = speed * ${this.ACCEL_FACTOR};
+    delaying = (167 * ((${expr} * ${this.ROTATION_FACTOR}) - dist_accel)) / speed;
+    Omni.setCarRotateRight(speed);
+    Omni.setCarSpeedMMPS(speed, 500);
+    delay(delaying);
+    Omni.setCarSlow2Stop(500);
+    delay(500);`;
     }
 
     // Structure de contrôle
@@ -152,9 +151,9 @@ export class RobotMlCompiler implements RobotMlVisitor {
         const cond = this.visitExpression(node.condition);
         const body = this.visitStatementList(node.body);
         return `
-                while (${cond}) {
-                    ${body}
-                }`;
+    while (${cond}) {
+        ${body}
+    }`;
     }
 
     visitConditional(node: Conditional): string {
@@ -167,14 +166,14 @@ export class RobotMlCompiler implements RobotMlVisitor {
         if (node.elseBody) {
             const elseBody = this.visitStatementList(node.elseBody);
             out += ` else {
-                    ${elseBody}
-                }`;
+        ${elseBody}
+    }`;
         }
         return out;
     }
 
     visitVarDecl(node: VarDecl): string {
-        const typeArduino = this.visitTypeVar(node.type);
+        const typeArduino = this.visitTypeVar(node.type); // Convertit le type de RobotML en type Arduino (ex: Number_ -> long)
         
         const val = this.visitExpression(node.expression!); 
         return `${typeArduino} ${node.name} = ${val};`;
@@ -231,7 +230,7 @@ export class RobotMlCompiler implements RobotMlVisitor {
         switch(node.sensorType) {
             case 'getDistance': return "senseDistance()";
             case 'getTimestamp': return "millis()";
-            case 'getBattery': return "getBattery()";
+            // case 'getBattery': return "getBattery()";
             default: return "0";
         }
     }
@@ -255,7 +254,7 @@ export class RobotMlCompiler implements RobotMlVisitor {
     // Gestion des types
 
     visitTypeVar(node: TypeVar): string {
-        // TypeVar est une union (Bool | Number_) on dispatch vers le bon
+        // TypeVar est une union (Bool | Number_) et on doit différencier les deux cas pour générer le type Arduino correct
         if (this.isBool(node)) return this.visitBool(node);
         if (this.isNumber_(node)) return this.visitNumber_(node);
         return "void";
